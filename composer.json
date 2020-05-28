@@ -1,0 +1,22 @@
+{
+    "name": "huaji/huawa-new",
+    "description": "花娃爬虫",
+    "authors": [
+        {
+            "name": "momo",
+            "email": "516801525@qq.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=7.0.1",
+        "guzzlehttp/guzzle": "~6.0",
+        "jaeger/querylist": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "HuaWa\\": "src/"
+        }
+    },
+    "license": "MIT"
+}
