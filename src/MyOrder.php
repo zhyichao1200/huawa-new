@@ -160,7 +160,7 @@ class MyOrder implements MyOrderAction,Action
 
     public function setStartTime($time)
     {
-        $this->endTime = $time;
+        $this->startTime = $time;
         return $this;
     }
 }
