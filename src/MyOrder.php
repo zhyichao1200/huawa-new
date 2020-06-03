@@ -100,7 +100,7 @@ class MyOrder implements MyOrderAction,Action
                 $item["address"] = $ql->find("p:eq(1)")->text();
                 $receiver = $ql->find("p:eq(2)")->text();
                 $preg=[
-                    "receiveName"=>'/收货人电话：(\d+)?/is',
+                    "receiveName"=>'/收货姓名：(\S+)?/is',
                     "itemNum"=>'/产品数量：(\d)?/is',
                     "receivePhone"=>'/收货人电话：(\d+)?/is',
                 ];
@@ -124,7 +124,8 @@ class MyOrder implements MyOrderAction,Action
             $preg=[
                 "member_phone"=>'/手机：(\d+)?/is',
             ];
-            $memberPhone = $this->htmlParser($item["member_phone"],$preg);
+            $memberPhone = $this->htmlParser($item["member_name"],$preg);
+
             $item["member_phone"] = $memberPhone["member_phone"];
             $item = array_merge($item,$receiver,$orderedBy,$itemInfo);
             return $item;

@@ -19,10 +19,9 @@ class FileStore implements CacheAction
     }
 
     public function get($key){
-        return json_decode(file_get_contents($this->fullDir($key)),true);
+        return json_decode(@file_get_contents($this->fullDir($key)),true);
     }
     public function put($key,$data){
-
         return file_put_contents($this->fullDir($key),is_string($data) ? $data : json_encode($data));
     }
 }
