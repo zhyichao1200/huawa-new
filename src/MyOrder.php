@@ -16,6 +16,7 @@ class MyOrder implements MyOrderAction,Action
     private $cookie;
     private $startTime="";
     private $endTime="";
+    private $page=1;
     private $client;
     public function __construct($cookie)
     {
@@ -69,7 +70,8 @@ class MyOrder implements MyOrderAction,Action
     private function itemList($html){
         $data = QueryList::html($html)->rules([
             "order_id"=>["tr span:eq(0) font","text"],
-            "member_name"=>["tr a:eq(0) font","text"],
+            "member_name"=>["tr a:eq(0)","html"],
+            "member_wrap"=>["tr","text"],
             "image"=>[".table_n div:eq(0) img","src"],
             "detail"=>[".table_n div:eq(0) a","href"],
             "card"=>[".table_n div","html"],
@@ -93,20 +95,20 @@ class MyOrder implements MyOrderAction,Action
                 "orderedPhone"=>""
             ];
             $itemInfo = [
-                "itemType"=>"",
-                "itemName"=>"",
+                "item_type"=>"",
+                "item_name"=>"",
             ];
             if (empty($item["attachment"])){
                 $item["address"] = $ql->find("p:eq(1)")->text();
                 $receiver = $ql->find("p:eq(2)")->text();
                 $preg=[
-                    "receiveName"=>'/收货姓名：(\S+)?/is',
-                    "itemNum"=>'/产品数量：(\d)?/is',
-                    "receivePhone"=>'/收货人电话：(\d+)?/is',
+                    "receive_name"=>'/收货姓名：(\S+)?/is',
+                    "item_num"=>'/产品数量：(\d)?/is',
+                    "receive_phone"=>'/收货人电话：(\d+)?/is',
                 ];
                 $receiver = $this->htmlParser($receiver,$preg);
                 $preg = [
-                    "orderedPhone"=>'/订货人电话：(\d+)?/is',
+                    "ordered_phone"=>'/订货人电话：(\d+)?/is',
                 ];
                 $orderedBy = $ql->find("p:eq(3)")->text();
                 $orderedBy = $this->htmlParser($orderedBy,$preg);
@@ -124,10 +126,12 @@ class MyOrder implements MyOrderAction,Action
             $preg=[
                 "member_phone"=>'/手机：(\d+)?/is',
             ];
-            $memberPhone = $this->htmlParser($item["member_name"],$preg);
+            $memberPhone = $this->htmlParser($item["member_wrap"],$preg);
 
             $item["member_phone"] = $memberPhone["member_phone"];
             $item = array_merge($item,$receiver,$orderedBy,$itemInfo);
+            unset($item["card"]);
+            unset($item["member_wrap"]);
             return $item;
         });
         foreach($data as $index=>$item){
@@ -138,19 +142,26 @@ class MyOrder implements MyOrderAction,Action
         return $data;
     }
 
+//    public function run(){
+//        $page = 1;
+//        $totalPage = 1;
+//        $list = [];
+//        do {
+//            $pageHtml = $this->pageView($page);
+//            $page += 1;
+//            if (!$pageHtml->getOk()) return $pageHtml;
+//            $totalPage == 1 and $totalPage = $this->totalPage($pageHtml->getData());
+//            $item = $this->itemList($pageHtml->getData());
+//            $list = array_merge($list,$item);
+//        } while ($page <= $totalPage);
+//        return new Result(true,"请求成功",$list);
+//    }
     public function run(){
-        $page = 1;
-        $totalPage = 1;
-        $list = [];
-        do {
-            $pageHtml = $this->pageView($page);
-            $page += 1;
-            if (!$pageHtml->getOk()) return $pageHtml;
-            $totalPage == 1 and $totalPage = $this->totalPage($pageHtml->getData());
-            $item = $this->itemList($pageHtml->getData());
-            $list = array_merge($list,$item);
-        } while ($page <= $totalPage);
-        return new Result(true,"请求成功",$list);
+        $pageHtml = $this->pageView($this->page);
+        if (!$pageHtml->getOk()) return $pageHtml;
+        $totalPage = $this->totalPage($pageHtml->getData());
+        $item = $this->itemList($pageHtml->getData());
+        return new Result(true,"请求成功",["item"=>$item,"total_page"=>$totalPage]);
     }
 
     public function setEndTime($time)
@@ -162,6 +173,11 @@ class MyOrder implements MyOrderAction,Action
     public function setStartTime($time)
     {
         $this->startTime = $time;
+        return $this;
+    }
+
+    public function setPage($page){
+        $this->page = $page;
         return $this;
     }
 }

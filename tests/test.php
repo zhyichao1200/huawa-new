@@ -25,4 +25,5 @@ if (!is_file($filePath) || !$cookie || $cookie["expire"] < time()){
     $cookie = $cookie->getData();
 }
 $order = new MyOrder($cookie["cookie"]);
-$order->run();
+$res = $order->setPage(1)->run();
+var_dump($res->getData());

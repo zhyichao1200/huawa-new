@@ -8,4 +8,5 @@ interface MyOrderAction
 {
     public function setStartTime($time);
     public function setEndTime($time);
+    public function setPage($page);
 }
